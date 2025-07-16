@@ -2,3 +2,15 @@ __pycache__/
 *.pyc
 *.db-journal
 instance/
+# Python
+__pycache__/
+*.pyc
+
+# Datenbanken
+verrechnung.db
+
+# Lokale Skripte
+zeige_kontonamen.py
+
+# Backup-Dateien
+*.bak

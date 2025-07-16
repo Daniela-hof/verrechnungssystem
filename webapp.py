@@ -126,7 +126,7 @@ def login():
 def logout():
     session.clear()
     app.config['ACTIVE_USER'] = None
-    return redirect(url_for('login'))
+    return redirect(url_for('startseite'))
 
 @app.route('/start', methods=['GET', 'POST'])
 def index():

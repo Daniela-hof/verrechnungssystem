@@ -14,8 +14,7 @@ import os
 from flask import send_file, abort
 
 app = Flask(__name__)
-app.secret_key = 'geheim'
-import os
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-change-me")
 
 # Basis-Ordner = der Ordner, in dem dieses Skript liegt
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

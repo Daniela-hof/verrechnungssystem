@@ -10,6 +10,8 @@ import re
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
+import os
+from flask import send_file, abort
 
 app = Flask(__name__)
 app.secret_key = 'geheim'
@@ -1647,6 +1649,17 @@ def overdraft_limit(name):
 
     # Ab hier gilt die 10%-Regel, sobald es mal Einnahmen gab
     return round(income * (percent/100.0), 1)
+
+@app.route("/admin/download-db")
+def download_db():
+    token = request.args.get("token", "")
+    expected = os.getenv("BACKUP_TOKEN", "")
+    if not expected or token != expected:
+        abort(403)
+    db_path = os.path.join(os.path.dirname(__file__), "verrechnung.db")
+    if not os.path.exists(db_path):
+        abort(404)
+    return send_file(db_path, as_attachment=True, download_name="verrechnung.db")
 
 
 if __name__ == '__main__':

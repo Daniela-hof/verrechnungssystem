@@ -1,0 +1,14 @@
+# Lokale Logs
+cron*.log
+
+# Lokale Ordner
+Backup/
+CSV/
+Doks/
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Virtuelle Umgebung
+.venv/

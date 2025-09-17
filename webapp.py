@@ -1,6 +1,4 @@
 
-# Test-Commit für Render Auto-Deploy
-
 from flask import Flask, render_template_string, request, redirect, session, Response, url_for
 import sqlite3
 from datetime import datetime
@@ -17,6 +15,29 @@ from flask import send_file, abort
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-change-me")
+
+def render_banner(status):
+    if status and status.get("maintenance"):
+        return f'''
+        <div style="background:#f8d7da; color:#721c24;
+                    border:1px solid #f5c6cb;
+                    padding:10px;
+                    text-align:center;
+                    font-weight:600;
+                    border-radius:5px;">
+            ⚠️ {status.get("message", "Wartung")}
+        </div>
+        '''
+    return ""
+
+import json
+
+def load_status():
+    try:
+        with open("/srv/app/Wieshof/static/status.json") as f:
+            return json.load(f)
+    except Exception:
+        return {"maintenance": False, "message": ""}
 
 # Basis-Ordner = der Ordner, in dem dieses Skript liegt
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -1185,7 +1206,6 @@ def export_monatsbericht():
                     headers={"Content-Disposition": "attachment; filename=monatsbericht.csv"})
 
 @app.route("/system")
-@app.route("/system")
 def system():
     conn = db_connection()
     c = conn.cursor()
@@ -1254,6 +1274,8 @@ def system():
     </head>
     <body class="container py-5">
 
+    {{ banner|safe }}
+
     <h2 class="mb-4">Hier kannst du loslegen</h2>
     <hr class="mb-5">
     
@@ -1288,11 +1310,21 @@ def system():
 
       <div class="col-md-4 mb-4">
         <div class="cta-card">
-          <h4>Meine Konten</h4>
-          <p>Hier kannst du Überweisungen tätigen, deinen Kontostand einsehen und deine Transaktionen verwalten.</p>
-          <div class="mt-auto">
-            <a href="/start" class="btn btn-primary btn-cta">Zu meinen Konten</a>
-          </div>
+            <h4>Zu meinen Konten</h4>
+            <p>Hier kannst du Überweisungen tätigen, deinen Kontostand einsehen und deine Transaktionen verwalten.</p>
+
+            <!-- Login-Formular direkt hier -->
+            <form method="post" action="/login" class="mt-auto">
+            <div class="mb-3">
+                <label for="benutzer" class="form-label">Benutzername:</label>
+                <input type="text" class="form-control" id="benutzer" name="benutzer" required>
+            </div>
+            <div class="mb-3">
+                <label for="passwort" class="form-label">Passwort:</label>
+                <input type="password" class="form-control" id="passwort" name="passwort" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
         </div>
       </div>
 
@@ -1347,7 +1379,7 @@ def system():
 
     </body>
     </html>
-    ''', empfaenger=empfaenger, brotpreis=brotpreis)
+    ''', empfaenger=empfaenger, brotpreis=brotpreis, banner=render_banner(load_status()))
 
 @app.route("/brotpreis/refresh")
 def brotpreis_refresh():
